@@ -1,0 +1,108 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\froman\fcharset0 Times-Roman;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red0\green0\blue0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Code for FOLDING POLYOMINOES WITH HOLES INTO A CUBE\
+\
+
+\f1 This code is supplementary material for paper \'91\cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Folding Polyominoes with Holes into a Cube\'92 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 by Aichholzer, O., \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Akitaya, H. A., Cheung, K. C., Demaine, E. D., Demaine, M. L., Fekete, S. P., Kleist L., Kostitsyna, I., L\'f6ffler, M., Mas\'e1rov\'e1, Z., Mundilova, K., Schmidt, C., CCCG (2019)
+\f0 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
+\
+
+\b WHAT THE CODE DOES:
+\b0 \
+Given a rectangular grid P in which some squares and slits along grid edges were cut out, the program checks whether such polyomino could fold into a unit cube C (a necessary condition for folding). \
+More precisely, when folding into the unit cube, we only allow folds along the grid edges, by 90 or 180 degrees, and we require that all faces of the unit cube get covered by some polyomino square. The code checks whether \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 there exists a mapping between all vertices of squares of P to vertices of C such that every pair of adjacent polyomino squares gets mapped consistently. (This means that, for every adjacent pair of squares s and s\'92 in P, if vertices of s have been mapped to some 4 vertices of C, then there are two possibilities how to map vertices of s\'92 onto C: the two vertices shared by s and s\'92 must be mapped consistently and for the other two vertices of s\'92 there are two options depending on whether s\'92 is folded at 90 degree angle to an adjacent face of C, or whether it is folded at 180 degree to the same face of C.)\
+\pard\pardeftab720\sl280\partightenfactor0
+\cf0 \outl0\strokewidth0 The code can be used to show non-foldability for small polyominoes: if no consistent mapping exists for a polyomino, then the polyomino cannot be folded onto C. On the other hand, any consistent vertex mapping covering all faces of C obtained by the algorithm that we tried could in practice be turned into a folding. However, we have not been able to prove that this is always the case.\cf2 \outl0\strokewidth0 \strokec2 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf2 \
+The code\
+\pard\pardeftab720\sl280\partightenfactor0
+\cf2 1) Runs a breadth-first-search on the polyomino squares, starting with the leftmost square in the top row of P and continue via adjacent squares. This produces a numbering of polyomino squares in which each but the first square is adjacent to at least one square with smaller number. \
+2) Maps vertices of the first square to the bottom face of C. Then extends the mapping one square at a time according to the numbering in up to two consistent ways. All such partial mappings are being tracked.\
+3) Once all vertices of polyomino\'92s squares have been consistently mapped to vertices of the unit cube, the code checks whether all faces of the unit cube have been covered and outputs all the consistent mappings that do so.
+\f1 \
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
+
+\b HOW TO USE THE CODE WITH YOUR OWN POLYOMINOES:
+\b0 \
+Input of the code = polyomino P whose foldability we want to check\
+Output = all consistent mappings of vertices of P onto the unit cube C and their number\
+\
+
+\b 1)
+\b0  
+\b How to specify the input polyomino:
+\b0  \
+Specify parameter 
+\i dim_a, dim_b, holes, slits\
+	dim_a 
+\i0 = number of rows in polyomino P\
+	
+\i dim_b 
+\i0 = number of columns in P\
+	Thus P is a rectangular grid (
+\i dim_a
+\i0 )x(
+\i dim_b
+\i0 ) and the following specifies the positions of holes and slits:\
+	
+\i holes 
+\i0 = list of ordered pairs specifying the coordinates of the cut-out squares from the grid (numbered from 0)\
+			e.g. 
+\i holes 
+\i0 = [[1,1],] means that the square  with coordinates [1,1] in P is a hole\
+	
+\i slits
+\i0  = list of square coordinates in the grid whose boundary contains slits, and numbers of square sides where the slit is (down=0,right=1,up=2,left=3)\
+			e.g. 
+\i slits 
+\i0 =\cf3  [[1,0,0],[2,3,1,2]] \cf0 means that the grid square with coordinates [1,0] has a slit on side 0 (=down); and square [2,3] has slits on sides 1,2 (right&up)\
+\
+
+\b 2) How to interpret the code output:
+\b0 \
+\'91Found valid labelling\'92 gives the number of found consistent mappings of vertices of P onto the cube and all mappings are listed.\
+\
+Each consistent mapping consists of (
+\i dim_a
+\i0 +1)x(
+\i dim_b
+\i0 +1) array A and a dictionary D:\
+The array A gives the vertex mappings of the original (
+\i dim_a
+\i0 )x(
+\i dim_b
+\i0 ) polyomino. \
+	e.g. A[2,1] = 100. means that the polyomino vertex with coordinates [2,1] (counting from 0) got mapped to cube vertex with coordinates [1,0,0] in all its incident polyomino squares.\
+Sometimes it may happen that a vertex v of the polyomino gets mapped to multiple different cube vertices from its multiple incident squares (e.g. if there was a slit through v), in that case v is said to be a special vertex, its label in A is 5. and for its mapped cube vertices see the dictionary D.\
+All possible labels in A:\
+	0. = coordinates [0,0,0]\
+	1. = [0,0,1]\
+	10. = [0,1,0]\
+	11. = [0,1,1]\
+	100. = [1,0,0]\
+	101. = [1,0,1]\
+	110. = [1,1,0]\
+	111. = [1,1,1]\
+	5. = special vertex, for its labels see the dictionary D\
+	-1 = vertex left unassigned (e.g. there was a hole)\
+\
+The dictionary D gives the mappings for \'92special\'92 polyomino vertices. \
+Keys in D = coordinates of vertex v in array A\
+Values in D = 2x2 array giving the coordinates of cube vertices to which v was assigned in all its incident polyomino squares\
+	e.g. (2, 2): array([[  -1.,  101.],\
+       				  [   0.,   -1.]])\
+		means that vertex (2,2) of the polyomino P was left unassigned in polyomino squares (1,1) and (2,2); and it got mapped to cube vertex [1,0,1] in the polyomino square (1,2); and to the cube vertex [0,0,0] in the polyomino square (2,1). \
+\
+\
+}
